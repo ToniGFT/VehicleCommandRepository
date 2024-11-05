@@ -2,7 +2,10 @@ package com.workshop.vehicle.vehicle_service.application.service;
 
 
 import com.workshop.vehicle.vehicle_service.domain.exceptions.VehicleNotFoundException;
+import com.workshop.vehicle.vehicle_service.domain.exceptions.VehicleUpdateException;
 import com.workshop.vehicle.vehicle_service.domain.model.aggregates.Vehicle;
+import com.workshop.vehicle.vehicle_service.domain.model.update.VehicleUpdater;
+import com.workshop.vehicle.vehicle_service.domain.model.validation.VehicleValidator;
 import com.workshop.vehicle.vehicle_service.domain.repository.VehicleRepository;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +16,15 @@ import reactor.core.publisher.Mono;
 public class VehicleCommandServiceImpl implements VehicleCommandService {
 
     private final VehicleRepository vehicleRepository;
+    private final VehicleValidator vehicleValidator;
+    private final VehicleUpdater vehicleUpdater;
 
     @Autowired
-    public VehicleCommandServiceImpl(VehicleRepository vehicleRepository) {
+    public VehicleCommandServiceImpl(VehicleRepository vehicleRepository, VehicleValidator vehicleValidator, VehicleUpdater vehicleUpdater) {
         this.vehicleRepository = vehicleRepository;
+        this.vehicleValidator = vehicleValidator;
+        this.vehicleUpdater = vehicleUpdater;
+
     }
 
     @Override
@@ -28,19 +36,9 @@ public class VehicleCommandServiceImpl implements VehicleCommandService {
     public Mono<Vehicle> updateVehicle(ObjectId id, Vehicle vehicle) {
         return vehicleRepository.findById(id)
                 .switchIfEmpty(Mono.error(new VehicleNotFoundException("Vehicle not found with id: " + id)))
-                .flatMap(existingVehicle -> {
-                    existingVehicle.setLicensePlate(vehicle.getLicensePlate());
-                    existingVehicle.setCapacity(vehicle.getCapacity());
-                    existingVehicle.setCurrentStatus(vehicle.getCurrentStatus());
-                    existingVehicle.setType(vehicle.getType());
-                    existingVehicle.setDriver(vehicle.getDriver());
-                    existingVehicle.setMaintenanceDetails(vehicle.getMaintenanceDetails());
-                    existingVehicle.setCurrentLocation(vehicle.getCurrentLocation());
-                    existingVehicle.setLastMaintenance(vehicle.getLastMaintenance());
-                    existingVehicle.setRouteId(vehicle.getRouteId());
-
-                    return vehicleRepository.save(existingVehicle);
-                });
+                .flatMap(existingRoute -> vehicleUpdater.mapAndValidate(vehicle, existingRoute)
+                        .onErrorMap(e -> new VehicleUpdateException("Failed to update route: " + e.getMessage())))
+                .flatMap(vehicleRepository::save);
     }
 
     @Override

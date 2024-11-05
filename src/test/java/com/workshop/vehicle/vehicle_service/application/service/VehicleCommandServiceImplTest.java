@@ -3,6 +3,7 @@ package com.workshop.vehicle.vehicle_service.application.service;
 import com.workshop.vehicle.vehicle_service.application.service.VehicleCommandServiceImpl;
 import com.workshop.vehicle.vehicle_service.domain.exceptions.VehicleNotFoundException;
 import com.workshop.vehicle.vehicle_service.domain.model.aggregates.Vehicle;
+import com.workshop.vehicle.vehicle_service.domain.model.update.VehicleUpdater;
 import com.workshop.vehicle.vehicle_service.domain.repository.VehicleRepository;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,6 +25,8 @@ public class VehicleCommandServiceImplTest {
 
     @Mock
     private VehicleRepository vehicleRepository;
+    @Mock
+    private VehicleUpdater vehicleUpdater;
 
     private Vehicle vehicle;
     private ObjectId vehicleId;
@@ -59,14 +62,17 @@ public class VehicleCommandServiceImplTest {
     @Test
     public void testUpdateVehicleSuccess() {
         when(vehicleRepository.findById(vehicleId)).thenReturn(Mono.just(vehicle));
+        when(vehicleUpdater.mapAndValidate(any(Vehicle.class), any(Vehicle.class))).thenReturn(Mono.just(vehicle));
         when(vehicleRepository.save(any(Vehicle.class))).thenReturn(Mono.just(vehicle));
 
         Mono<Vehicle> response = vehicleCommandService.updateVehicle(vehicleId, vehicle);
 
         assertEquals(vehicle, response.block());
         verify(vehicleRepository, times(1)).findById(vehicleId);
+        verify(vehicleUpdater, times(1)).mapAndValidate(any(Vehicle.class), any(Vehicle.class));
         verify(vehicleRepository, times(1)).save(any(Vehicle.class));
     }
+
 
     @Test
     public void testUpdateVehicleNotFound() {
