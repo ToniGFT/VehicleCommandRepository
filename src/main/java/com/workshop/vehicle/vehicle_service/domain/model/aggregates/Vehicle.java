@@ -23,7 +23,7 @@ import java.time.LocalDate;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Document(collection = "vehicles")
+@Document(collection = "Vehicle")
 public class Vehicle {
 
     @Id
