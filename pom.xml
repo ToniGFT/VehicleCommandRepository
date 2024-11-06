@@ -72,7 +72,6 @@
             <artifactId>junit-platform-launcher</artifactId>
             <scope>testRuntime</scope>
         </dependency>
-
     </dependencies>
 
     <build>

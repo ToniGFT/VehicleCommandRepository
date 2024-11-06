@@ -2,6 +2,7 @@ package com.workshop.vehicle.vehicle_service.application.controller;
 
 import com.workshop.vehicle.vehicle_service.application.response.service.VehicleResponseService;
 import com.workshop.vehicle.vehicle_service.application.service.VehicleCommandService;
+import com.workshop.vehicle.vehicle_service.domain.exceptions.VehicleUpdateException;
 import com.workshop.vehicle.vehicle_service.domain.model.aggregates.Vehicle;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
@@ -28,9 +29,10 @@ public class VehicleCommandController {
     public Mono<ResponseEntity<Vehicle>> createVehicle(@RequestBody Vehicle vehicle) {
         logger.info("Creating a new vehicle");
         return vehicleCommandService.createVehicle(vehicle)
-                .flatMap(vehicleResponseService::buildOkResponse)
+                .flatMap(vehicleResponseService::buildOkResponse)  // Asegúrate de que buildOkResponse nunca reciba un null
                 .doOnSuccess(response -> logger.info("Successfully created vehicle with ID: {}", response.getBody() != null ? response.getBody().getVehicleId() : "N/A"))
-                .doOnError(error -> logger.error("Error occurred while creating vehicle", error));
+                .doOnError(error -> logger.error("Error occurred while creating vehicle", error))
+                .switchIfEmpty(Mono.error(new VehicleUpdateException("Failed to create the vehicle")));  // Maneja el caso de Mono vacío
     }
 
     @PutMapping("/{idString}")
