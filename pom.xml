@@ -73,7 +73,18 @@
             <scope>testRuntime</scope>
         </dependency>
     </dependencies>
-
+    <profiles>
+        <profile>
+            <id>exclude-e2e-tests</id>
+            <activation>
+                <activeByDefault>false</activeByDefault> <!-- Este perfil no se activa por defecto -->
+            </activation>
+            <properties>
+                <!-- Excluir los tests E2E de cualquier tipo -->
+                <skip.endtoend.tests>true</skip.endtoend.tests>
+            </properties>
+        </profile>
+    </profiles>
     <build>
         <plugins>
             <plugin>
