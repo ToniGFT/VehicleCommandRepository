@@ -15,7 +15,7 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/vehicles")
 public class VehicleCommandController {
 
-    private static final Logger logger = LoggerFactory.getLogger(VehicleCommandController.class);
+    private final Logger logger = LoggerFactory.getLogger(VehicleCommandController.class);
     private final VehicleCommandService vehicleCommandService;
     private final VehicleResponseService vehicleResponseService;
 
@@ -29,10 +29,10 @@ public class VehicleCommandController {
     public Mono<ResponseEntity<Vehicle>> createVehicle(@RequestBody Vehicle vehicle) {
         logger.info("Creating a new vehicle");
         return vehicleCommandService.createVehicle(vehicle)
-                .flatMap(vehicleResponseService::buildOkResponse)  // Asegúrate de que buildOkResponse nunca reciba un null
+                .flatMap(vehicleResponseService::buildOkResponse)
                 .doOnSuccess(response -> logger.info("Successfully created vehicle with ID: {}", response.getBody() != null ? response.getBody().getVehicleId() : "N/A"))
                 .doOnError(error -> logger.error("Error occurred while creating vehicle", error))
-                .switchIfEmpty(Mono.error(new VehicleUpdateException("Failed to create the vehicle")));  // Maneja el caso de Mono vacío
+                .switchIfEmpty(Mono.error(new VehicleUpdateException("Failed to create the vehicle")));
     }
 
     @PutMapping("/{idString}")
