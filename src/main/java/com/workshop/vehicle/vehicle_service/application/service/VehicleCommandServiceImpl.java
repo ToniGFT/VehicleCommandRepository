@@ -7,6 +7,7 @@ import com.workshop.vehicle.vehicle_service.domain.model.aggregates.Vehicle;
 import com.workshop.vehicle.vehicle_service.domain.model.update.VehicleUpdater;
 import com.workshop.vehicle.vehicle_service.domain.model.validation.VehicleValidator;
 import com.workshop.vehicle.vehicle_service.domain.repository.VehicleRepository;
+import com.workshop.vehicle.vehicle_service.infraestructure.service.RouteService;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,20 +17,23 @@ import reactor.core.publisher.Mono;
 public class VehicleCommandServiceImpl implements VehicleCommandService {
 
     private final VehicleRepository vehicleRepository;
-    private final VehicleValidator vehicleValidator;
     private final VehicleUpdater vehicleUpdater;
+    private final RouteService routeService;
+
 
     @Autowired
-    public VehicleCommandServiceImpl(VehicleRepository vehicleRepository, VehicleValidator vehicleValidator, VehicleUpdater vehicleUpdater) {
+    public VehicleCommandServiceImpl(VehicleRepository vehicleRepository,VehicleUpdater vehicleUpdater, RouteService routeService) {
         this.vehicleRepository = vehicleRepository;
-        this.vehicleValidator = vehicleValidator;
         this.vehicleUpdater = vehicleUpdater;
-
+        this.routeService = routeService;
     }
 
-    @Override
     public Mono<Vehicle> createVehicle(Vehicle vehicle) {
-        return vehicleRepository.save(vehicle);
+        return routeService.getRouteById(vehicle.getRouteId().toHexString())
+                .flatMap(route -> {
+                    return vehicleRepository.save(vehicle);
+                })
+                .switchIfEmpty(Mono.error(new RuntimeException("Route not found with id: " + vehicle.getRouteId().toString())));
     }
 
     @Override
