@@ -5,6 +5,8 @@ import com.workshop.vehicle.vehicle_service.domain.exceptions.VehicleNotFoundExc
 import com.workshop.vehicle.vehicle_service.domain.model.aggregates.Vehicle;
 import com.workshop.vehicle.vehicle_service.domain.model.update.VehicleUpdater;
 import com.workshop.vehicle.vehicle_service.domain.repository.VehicleRepository;
+import com.workshop.vehicle.vehicle_service.infraestructure.models.aggregates.Route;
+import com.workshop.vehicle.vehicle_service.infraestructure.service.RouteService;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,14 +29,18 @@ public class VehicleCommandServiceImplTest {
     private VehicleRepository vehicleRepository;
     @Mock
     private VehicleUpdater vehicleUpdater;
+    @Mock
+    private RouteService routeService;
 
     private Vehicle vehicle;
     private ObjectId vehicleId;
+    private ObjectId routeId;
 
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
         vehicleId = ObjectId.get();
+        routeId = ObjectId.get();
         vehicle = Vehicle.builder()
                 .vehicleId(vehicleId)
                 .licensePlate("ABC123")
@@ -45,18 +51,33 @@ public class VehicleCommandServiceImplTest {
                 .maintenanceDetails(null)
                 .currentLocation(null)
                 .lastMaintenance(null)
-                .routeId(ObjectId.get())
+                .routeId(routeId)
                 .build();
     }
 
     @Test
-    public void testCreateVehicle() {
+    public void testCreateVehicleRouteExists() {
+        when(routeService.getRouteById(any(String.class))).thenReturn(Mono.just(new Route()));
         when(vehicleRepository.save(any(Vehicle.class))).thenReturn(Mono.just(vehicle));
 
         Mono<Vehicle> response = vehicleCommandService.createVehicle(vehicle);
 
         assertEquals(vehicle, response.block());
         verify(vehicleRepository, times(1)).save(any(Vehicle.class));
+        verify(routeService, times(1)).getRouteById(any(String.class));
+    }
+
+    @Test
+    public void testCreateVehicleRouteNotFound() {
+        when(routeService.getRouteById(any(String.class))).thenReturn(Mono.empty());
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            vehicleCommandService.createVehicle(vehicle).block();
+        });
+
+        assertEquals("Route not found with id: " + vehicle.getRouteId().toString(), exception.getMessage());
+        verify(vehicleRepository, times(0)).save(any(Vehicle.class));
+        verify(routeService, times(1)).getRouteById(any(String.class));
     }
 
     @Test
