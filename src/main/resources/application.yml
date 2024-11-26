@@ -15,10 +15,15 @@ spring:
 
 kafka:
   topics:
-    route-events: route-events
+    vehicle-events: vehicle-events
 
 logging:
   level:
     root: INFO
     org.apache.kafka: WARN
     org.springframework.kafka: INFO
+
+routes:
+  api:
+    base-url: http://localhost:8080/routes
+    get-by-id: /{id}
