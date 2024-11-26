@@ -1,10 +1,24 @@
+server:
+  port: 8083
+
 spring:
   application:
-    name: route
+    name: vehicle-command
+  kafka:
+    bootstrap-servers: 127.0.0.1:9093
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
   data:
     mongodb:
       uri: mongodb+srv://nabz:nabz@workshop.rh1jm.mongodb.net/Workshop?retryWrites=true&w=majority
-routes:
-  api:
-    base-url: http://localhost:8081
-    get-by-id: /routes/{idString}
+
+kafka:
+  topics:
+    route-events: route-events
+
+logging:
+  level:
+    root: INFO
+    org.apache.kafka: WARN
+    org.springframework.kafka: INFO
