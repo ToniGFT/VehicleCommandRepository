@@ -1,0 +1,239 @@
+openapi: 3.0.1
+info:
+  title: Vehicle Command API
+  description: API para gestionar comandos de vehículos, permitiendo crear, actualizar y eliminar vehículos.
+  version: "1.0.0"
+servers:
+  - url: http://localhost:8080
+    description: Servidor local de desarrollo
+
+paths:
+  /vehicles:
+    post:
+      summary: Crear un nuevo vehículo
+      description: Crea un nuevo vehículo en el sistema.
+      operationId: createVehicle
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Vehicle'
+      responses:
+        '200':
+          description: Vehículo creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vehicle'
+        '400':
+          description: Error de validación en los datos del vehículo
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Error de validación
+        '500':
+          description: Error interno al crear el vehículo
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Error interno al crear el vehículo
+
+  /vehicles/{idString}:
+    put:
+      summary: Actualizar un vehículo
+      description: Actualiza la información de un vehículo específico mediante su ID.
+      operationId: updateVehicle
+      parameters:
+        - name: idString
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID del vehículo en formato de cadena
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Vehicle'
+      responses:
+        '200':
+          description: Vehículo actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vehicle'
+        '404':
+          description: Vehículo no encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Vehículo no encontrado
+        '400':
+          description: Error de validación en los datos del vehículo
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Error de validación en los datos del vehículo
+        '500':
+          description: Error interno al actualizar el vehículo
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Error interno al actualizar el vehículo
+
+    delete:
+      summary: Eliminar un vehículo
+      description: Elimina un vehículo específico mediante su ID.
+      operationId: deleteVehicle
+      parameters:
+        - name: idString
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID del vehículo en formato de cadena
+      responses:
+        '204':
+          description: Vehículo eliminado exitosamente, sin contenido en la respuesta
+        '404':
+          description: Vehículo no encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Vehículo no encontrado
+        '500':
+          description: Error interno al eliminar el vehículo
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Error interno al eliminar el vehículo
+
+components:
+  schemas:
+    Vehicle:
+      type: object
+      properties:
+        vehicleId:
+          type: string
+          description: Identificador único del vehículo
+          example: "61616c64d4d4f1b2c5f8e7e9"
+        licensePlate:
+          type: string
+          description: Número de matrícula del vehículo
+          example: "ABC-1234"
+        capacity:
+          type: integer
+          description: Capacidad máxima de pasajeros del vehículo
+          example: 4
+        currentStatus:
+          type: string
+          description: Estado actual del vehículo
+          enum:
+            - AVAILABLE
+            - IN_SERVICE
+            - OUT_OF_SERVICE
+          example: "AVAILABLE"
+        type:
+          type: string
+          description: Tipo de vehículo
+          enum:
+            - CAR
+            - TRUCK
+            - MOTORCYCLE
+          example: "CAR"
+        driver:
+          type: object
+          $ref: '#/components/schemas/Driver'
+        maintenanceDetails:
+          type: object
+          $ref: '#/components/schemas/MaintenanceDetails'
+        currentLocation:
+          type: object
+          $ref: '#/components/schemas/Coordinates'
+        lastMaintenance:
+          type: string
+          format: date
+          description: Fecha de la última revisión de mantenimiento
+          example: "2023-01-15"
+        routeId:
+          type: string
+          description: Identificador de la ruta actual
+          example: "615b4e64c4f8a7e9b2c5f8d3"
+
+    Driver:
+      type: object
+      properties:
+        driverId:
+          type: string
+          description: ID único del conductor
+          example: "61616c64d4d4f1b2c5f8e7f0"
+        name:
+          type: string
+          description: Nombre del conductor
+          example: "Juan Perez"
+        licenseNumber:
+          type: string
+          description: Número de licencia del conductor
+          example: "D1234567"
+
+    MaintenanceDetails:
+      type: object
+      properties:
+        lastServiceDate:
+          type: string
+          format: date
+          description: Fecha del último mantenimiento
+          example: "2023-01-10"
+        nextServiceDate:
+          type: string
+          format: date
+          description: Fecha del próximo mantenimiento
+          example: "2023-06-10"
+        serviceNotes:
+          type: string
+          description: Notas sobre el mantenimiento del vehículo
+          example: "Reemplazo de frenos y revisión de aceite."
+
+    Coordinates:
+      type: object
+      properties:
+        latitude:
+          type: number
+          format: double
+          description: Latitud actual del vehículo
+          example: -34.603722
+        longitude:
+          type: number
+          format: double
+          description: Longitud actual del vehículo
+          example: -58.381592
