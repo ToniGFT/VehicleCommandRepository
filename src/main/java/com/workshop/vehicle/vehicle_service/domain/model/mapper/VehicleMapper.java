@@ -1,7 +1,6 @@
 package com.workshop.vehicle.vehicle_service.domain.model.mapper;
 
 import com.workshop.vehicle.vehicle_service.domain.events.VehicleCreatedEvent;
-import com.workshop.vehicle.vehicle_service.domain.events.VehicleDeletedEvent;
 import com.workshop.vehicle.vehicle_service.domain.events.VehicleUpdatedEvent;
 import com.workshop.vehicle.vehicle_service.domain.model.aggregates.Vehicle;
 import com.workshop.vehicle.vehicle_service.domain.model.mapper.configuration.ModelMapperConfig;
@@ -26,9 +25,4 @@ public class VehicleMapper {
         return modelMapper.map(vehicle, VehicleUpdatedEvent.class);
     }
 
-    public static VehicleDeletedEvent toVehicleDeletedEvent(Vehicle vehicle) {
-        return VehicleDeletedEvent.builder()
-                .vehicleId(vehicle.getVehicleId())
-                .build();
-    }
 }

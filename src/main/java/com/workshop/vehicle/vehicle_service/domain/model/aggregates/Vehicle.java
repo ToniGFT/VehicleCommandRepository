@@ -40,7 +40,7 @@ public class Vehicle {
     private VehicleStatus currentStatus;
 
     @NotNull(message = "Vehicle type is required")
-    private VehicleType type;
+    private VehicleType vehicleType;
 
     @NotNull(message = "Driver is required")
     private Driver driver;

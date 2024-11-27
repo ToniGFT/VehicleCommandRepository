@@ -22,7 +22,7 @@ public class VehicleCreatedEvent {
     private String licensePlate;
     private Integer capacity;
     private VehicleStatus currentStatus;
-    private VehicleType type;
+    private VehicleType vehicleType;
     private Driver driver;
     private MaintenanceDetails maintenanceDetails;
     private Coordinates currentLocation;
